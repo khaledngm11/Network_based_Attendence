@@ -1,0 +1,44 @@
+
+        <!DOCTYPE html>
+        <html lang="ar">
+        <head>
+            <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+            <meta http-equiv="Pragma" content="no-cache" />
+            <meta http-equiv="Expires" content="0" />
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>تسجيل الحضور</title>
+            
+            <link rel="stylesheet" href="{{ url_for('static', filename='success.css') }}">
+            <link rel="stylesheet" href="{{ url_for('static', filename='spinner.css') }}">
+        </head>
+        <body>
+            <div class="preloader" id="preloader">
+                <div class="spinner"></div>
+            </div>
+            <div class="header">Faculty of Computers And Artificial Intelligence</div>
+            <div class="container">
+                <h1>تسجيل الحضور</h1>
+                <div class="message">تم تسجيل حضورك بنجاح.</div>
+                 
+                <a href="/">عودة إلى النموذج</a>
+                <div class="qr-container">
+                    <img src="/qr" alt="QR Code">
+                <h2><a href="{{data}}">{{data}}</a></h2>
+                </div>
+            </div>
+            <a class="footer" href="http://khaledngm11.github.io"><h2>Prepared by : Eng / Khaled Eid</h2> </a>   
+
+            
+        <script>
+            // إخفاء صفحة التحميل بعد 3 ثوانٍ
+            window.addEventListener("load", function() {
+                setTimeout(function() {
+                    document.getElementById('preloader').style.display = 'none';
+                }, 500); // 3 ثوانٍ
+            });
+        </script>
+        </body>
+        </html>
+        
+       

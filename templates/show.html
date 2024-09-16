@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/font-awesome/css/all.min.css"> <!-- مسار محلي لمكتبة Font Awesome -->
+    <script src="static/xlsx.full.min.js"></script> <!-- مسار محلي لمكتبة xlsx -->
+
+    <title>عرض بيانات الحضور</title>
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            text-align: center;
+        }
+        .header {
+            background: #227088;
+            color: #fff;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            width: 100%;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 800px;
+            margin: 20px auto;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 16px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+        }
+        th {
+            background-color: #227088;
+            color: #fff;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .total-students {
+            margin: 20px 0;
+            font-size: 18px;
+            color: #333;
+        }
+        .no-data {
+            font-size: 18px;
+            color: #d9534f;
+            display: none;
+        }
+        .footer {
+            background: #227088;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+            width: 100%;
+            bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">Faculty of Computers And Artificial Intelligence</div>
+    <div class="container">
+        <h1>بيانات الحضور</h1>
+        <div class="total-students">عدد الطلاب الكلي: <span id="student-count">0</span></div>
+        <i id="downloadButton" class="fa fa-file-excel" style="font-size: 24px; color: #22886e; cursor: pointer; margin: 20px;"></i>
+        <i id="copyButton" class="fa fa-copy" style="font-size: 24px; color: #227088; cursor: pointer; margin: 20px;"></i>
+        <i id="printButton" class="fa fa-print" style="font-size: 24px; color: #9f5252; cursor: pointer; margin: 20px;"></i>
+
+        <div id="no-data-message" class="no-data">لا توجد بيانات لعرضها.</div>
+        <table id="data-table">
+            <thead>
+                <tr>
+                    <th>رقم</th>
+                    <th>اسم الطالب</th>
+                    <th>كود الطالب</th>
+                    <th>المادة</th>
+                </tr>
+            </thead>
+            <tbody id="data-body">
+                <!-- Data will be injected here by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+    <div class="footer">Prepared by Eng / Khaled Eid</div>
+    <script>
+        function fetchData() {
+            fetch('/data')
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById('data-body');
+                    const studentCount = document.getElementById('student-count');
+                    const noDataMessage = document.getElementById('no-data-message');
+                    let hasData = false;
+                    tableBody.innerHTML = ''; // Clear existing rows
+                    let index = 1;
+                    let count = 0;
+
+                    for (const [ip, details] of Object.entries(data)) {
+                        // Check if the data has valid values
+                        if (details.name && details.student_id && details.subject) {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${index++}</td>
+                                <td>${details.name}</td>
+                                <td>${details.student_id}</td>
+                                <td>${details.subject}</td>
+                            `;
+                            tableBody.appendChild(row);
+                            count++;
+                            hasData = true;
+                        }
+                    }
+
+                    // Update the student count
+                    studentCount.textContent = count;
+
+                    // Show or hide the table and no-data message
+                    if (hasData) {
+                        document.querySelector('table').style.display = 'table';
+                        noDataMessage.style.display = 'none';
+                    } else {
+                        document.querySelector('table').style.display = 'none';
+                        noDataMessage.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    document.getElementById('data-body').innerHTML = '<tr><td colspan="4">حدث خطأ في تحميل البيانات.</td></tr>';
+                });
+        }
+
+        fetchData();
+        setInterval(fetchData, 5000);
+    </script>
+    <script>
+        document.getElementById("copyButton").addEventListener("click", function() {
+            var table = document.getElementById("data-table"); // استبدل 'myTable' بمعرف الجدول الخاص بك
+            var range = document.createRange();
+            range.selectNode(table);
+            window.getSelection().removeAllRanges(); // إزالة أي تحديدات سابقة
+            window.getSelection().addRange(range); // تحديد الجدول بالكامل
+            
+            try {
+                // نسخ المحتوى إلى الحافظة
+                var successful = document.execCommand('copy');
+                var msg = successful ? 'تم نسخ المحتوى بنجاح!' : 'فشل في النسخ!';
+                alert(msg);
+            } catch (err) {
+                alert('لم يتمكن المتصفح من نسخ المحتوى تلقائيًا.');
+            }
+        
+            window.getSelection().removeAllRanges(); // إلغاء تحديد الجدول
+        });
+        </script>
+        <script>
+            document.getElementById("downloadButton").addEventListener("click", function() {
+                var table = document.getElementById("data-table");
+                var wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
+        
+                // الحصول على اسم المادة من أول صف في الجدول
+                var firstRow = table.querySelector("tbody tr:first-child");
+                var subjectName = firstRow ? firstRow.cells[3].textContent.trim() : "data"; // يفترض أن عمود المادة هو العمود الرابع
+        
+                // اسم الملف باستخدام اسم المادة
+                var fileName = `${subjectName}_data.xlsx`;
+        
+                // إنشاء ملف Excel وتحميله
+                XLSX.writeFile(wb, fileName);
+            });
+        </script>
+        
+        <script>
+            document.getElementById("printButton").addEventListener("click", function() {
+                // الحصول على جدول البيانات
+                var table = document.getElementById("data-table").outerHTML;
+        
+                // الحصول على اسم المادة من أول صف في الجدول
+                var firstRow = document.querySelector("#data-table tbody tr:first-child");
+                var subjectName = firstRow ? firstRow.cells[3].textContent.trim() : "بيانات الحضور"; // يفترض أن عمود المادة هو العمود الرابع
+        
+                // إنشاء نافذة جديدة للطباعة
+                var printWindow = window.open('', '', 'height=600,width=800');
+                printWindow.document.write('<html><head><title>طباعة الجدول</title>');
+                
+                // تضمين CSS الخاص بالصفحة الحالية في نافذة الطباعة مع ضبط اتجاه النص
+                printWindow.document.write('<style>');
+                printWindow.document.write('body { font-family: Arial, sans-serif; margin: 0; padding: 0; direction: rtl; }');
+                printWindow.document.write('table { width: 100%; border-collapse: collapse; margin: 20px auto; }');
+                printWindow.document.write('th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }');
+                printWindow.document.write('th { background-color: #227088; color: #fff; }');
+                printWindow.document.write('tr:nth-child(even) { background-color: #f2f2f2; }');
+                printWindow.document.write('h1 { font-size: 24px; color: #333; text-align: center; }');
+                printWindow.document.write('html, body { height: 100%; margin: 0; padding: 0; }');
+                printWindow.document.write('</style></head><body>');
+                printWindow.document.write('<h1>بيانات الحضور - ' + subjectName + '</h1>');
+                printWindow.document.write(table);
+                printWindow.document.write('</body></html>');
+        
+                // إغلاق الوثيقة وإطلاق نافذة الطباعة
+                printWindow.document.close();
+                printWindow.focus();
+                printWindow.print();
+            });
+        </script>
+        
+        
+</body>
+</html>

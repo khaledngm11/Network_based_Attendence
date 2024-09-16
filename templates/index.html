@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+        <html lang="ar">
+        <head>
+            
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>تسجيل الحضور</title>
+            <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+            <link rel="stylesheet" href="{{ url_for('static', filename='spinner.css') }}">
+        </head>
+        <body>
+
+            <div class="preloader" id="preloader">
+                <div class="spinner"></div>
+            </div>
+
+            <div class="header">Faculty of Computers And Artificial Intelligence</div>
+            <div class="container">
+                <h1>تسجيل الحضور</h1>
+                <form action="/register" method="post" onsubmit="return validateStudentID()">
+                    <label for="name">:اسم الطالب</label>
+                    <input type="text" id="name" name="name" required>
+                    <label for="student_id">:كود الطالب</label>
+                    <input type="text" id="student_id" name="student_id" pattern="\d{1,10}" title="يرجى إدخال أرقام فقط وبحد أقصى 10 أرقام" required>
+                    <label for="subject">:المادة</label>
+                    <input type="text" id="subject" name="subject" required>
+                    <label>:القسم</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="department" value="AI" required>
+                            AI
+                        </label>
+                        <label>
+                            <input type="radio" name="department" value="CE" required>
+                            CE
+                        </label>
+                        <label>
+                            <input type="radio" name="department" value="IT" required>
+                            IT
+                        </label>
+                        <label>
+                            <input type="radio" name="department" value="IS" required>
+                            IS
+                        </label>
+                        <label>
+                            <input type="radio" name="department" value="MM" required>
+                            MM
+                        </label>
+                        <input type="hidden" id="device_fingerprint" name="device_fingerprint">
+                    </div>
+
+                    <input type="submit" value="سجل الحضور">
+                </form>
+                <div class="qr-container">
+                    <img src="/qr" alt="QR Code">
+                    <h2><a href="{{data}}">{{data}}</a></h2>
+                </div>
+            </div>
+            <a class="footer" href="http://khaledngm11.github.io"><h2>Prepared by : Eng / Khaled Eid</h2> </a>   
+            
+            <script>
+               
+                window.addEventListener("load", function() {
+                    setTimeout(function() {
+                        document.getElementById('preloader').style.display = 'none';
+                        document.getElementById('content').style.display = 'block';
+                    }, 500); 
+                });
+            </script>
+             <script>
+                function getDeviceFingerprint() {
+                    return {
+                        userAgent: navigator.userAgent,
+                        language: navigator.language,
+                        platform: navigator.platform,
+                        screenResolution: `${window.screen.width}x${window.screen.height}`,
+                        screenAvailableResolution: `${window.screen.availWidth}x${window.screen.availHeight}`,
+                        colorDepth: window.screen.colorDepth,
+                        screenOrientation: window.screen.orientation ? window.screen.orientation.type : "unknown",
+                        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                        cookiesEnabled: navigator.cookieEnabled,
+                        doNotTrack: navigator.doNotTrack,
+                        hardwareConcurrency: navigator.hardwareConcurrency,
+                        plugins: Array.from(navigator.plugins).map(plugin => plugin.name).join(', '),
+                        mimeTypes: Array.from(navigator.mimeTypes).map(mime => mime.type).join(', '),
+                        vendor: navigator.vendor,
+                        connection: navigator.connection ? navigator.connection.effectiveType : "unknown",
+                        storageEstimate: (async () => {
+                            let estimate = await navigator.storage.estimate();
+                            return estimate.quota;
+                        })(),
+                        // Add more fields if needed
+                    };
+                }
+            
+                document.getElementById('device_fingerprint').value = JSON.stringify(getDeviceFingerprint());
+            </script>
+        </body>
+
+        </html>
+    
